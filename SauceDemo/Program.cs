@@ -1,14 +1,13 @@
-﻿using OpenQA.Selenium;
-using SauceDemo;
-using SauceDemo.Constants;
+﻿using SauceDemo;
 using SauceDemo.Pages;
 
 try
 {
     var loginPage = new LoginPage();
 
-    loginPage.Login();
-
+    loginPage
+        .OpenUrl()
+        .LoginWithoutPassword();
 }
 catch (Exception ex)
 {

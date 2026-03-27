@@ -9,7 +9,6 @@ namespace SauceDemo.Pages
     using OpenQA.Selenium.Support.UI;
     using SauceDemo.Constants;
     using SauceDemo.Utilities;
-    using SeleniumExtras.PageObjects;
 
     /// <summary>
     /// The Login Page Class which is responsible for automating the whole process of loggining into an account and encapsulating the logic for that.
@@ -20,101 +19,87 @@ namespace SauceDemo.Pages
         private readonly IWebDriver webDriver;
         private readonly Actions actions;
 
-        [FindsBy(How = How.CssSelector, Using = DataConstants.LoginPageConstants.UsernameInputFieldCssSelector)]
-        [CacheLookup]
-        private readonly IWebElement? usernameInputField;
-
-        [FindsBy(How = How.CssSelector, Using = DataConstants.LoginPageConstants.PasswordInputFieldCssSelector)]
-        [CacheLookup]
-        private readonly IWebElement? passwordInputField;
-
-        [FindsBy(How = How.CssSelector, Using = DataConstants.LoginPageConstants.LoginButtonCssSelector)]
-        [CacheLookup]
-        private readonly IWebElement? loginButton;
-
-        [FindsBy(How = How.CssSelector, Using = DataConstants.LoginPageConstants.PasswordRequiredErrorLoginMessageCssSelector)]
-        [CacheLookup]
-        private readonly IWebElement? passwordRequiredErrorMessage;
+        private readonly By usernameInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.UsernameInputFieldCssSelector);
+        private readonly By passwordInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.PasswordInputFieldCssSelector);
+        private readonly By loginButtonSelector = By.CssSelector(DataConstants.LoginPageConstants.LoginButtonCssSelector);
+        private readonly By passwordRequiredErrorMessageSelector = By.CssSelector(DataConstants.LoginPageConstants.PasswordRequiredErrorLoginMessageCssSelector);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginPage"/> class.
         /// </summary>
-        public LoginPage()
+        /// <param name="webDriver">The WebDriver instances passed down to the main page constructor.</param>
+        public LoginPage(IWebDriver webDriver)
         {
-            this.webDriver = Driver.Initialize("edge");
+            this.webDriver = webDriver;
             this.wait = new WebDriverWait(this.webDriver, TimeSpan.FromSeconds(30));
             this.actions = new Actions(this.webDriver);
-            PageFactory.InitElements(this.webDriver, this);
         }
 
         /// <summary>
         /// Method responsible for automating the process of logging into an account as part of the given website that needs to be tested.
         /// Specifically tests the funcitonality as it is intended to be used i.e. by providing all the necessary credentials.
         /// </summary>
-        public void LoginWithPassword()
+        /// <param name="username">Username to attempt to login with.</param>
+        /// <param name="password">Password to attempt to login with.</param>
+        /// <returns>An element present only on the main page to determine whether a redirect upon successful login was actually achieved.</returns>
+        public MainPage LoginWithPassword(string username, string password)
         {
-            this.WaitUntilElementsAreDisplayed();
+            var usernameInputField = this.webDriver.FindElement(this.usernameInputFieldSelector);
+            var passwordInputField = this.webDriver.FindElement(this.passwordInputFieldSelector);
+            var loginButton = this.webDriver.FindElement(this.loginButtonSelector);
 
-            var username = WebDriverUtilities.PickUsername();
+            this.WaitUntilLoginFormElementsAreDisplayed(usernameInputField, passwordInputField, loginButton);
 
-            WebDriverUtilities.InteractWithInputElement(this.actions, this.usernameInputField!, username);
-            WebDriverUtilities.InteractWithInputElement(this.actions, this.passwordInputField!, DataConstants.LoginPageConstants.Password);
-            WebDriverUtilities.InteractWithSubmitWithButton(this.actions, this.loginButton!);
+            WebDriverUtilities.InteractWithInputElement(this.actions, usernameInputField, username);
+            WebDriverUtilities.InteractWithInputElement(this.actions, passwordInputField, password);
+            WebDriverUtilities.InteractWithSubmitWithButton(this.actions, loginButton);
+
+            return new MainPage(this.webDriver);
         }
 
         /// <summary>
         /// Method responsible for automating the process of logging into an account as part of the given website that needs to be tested.
         /// Tests the functionality without providing a password.
         /// </summary>
-        public void LoginWithoutPassword()
+        /// <returns>IPage Interface to determine whether a login attempt was successful by redirecting to main page or not.</returns>
+        /// <param name="username">The username necessary for testing the login functionality.</param>
+        /// <param name="password">The password necessary for testing the login functuonality.</param>
+        public LoginPage LoginWithoutPassword(string username, string password)
         {
-            this.WaitUntilElementsAreDisplayed();
+            var usernameInputField = this.webDriver.FindElement(this.usernameInputFieldSelector);
+            var passwordInputField = this.webDriver.FindElement(this.passwordInputFieldSelector);
+            var loginButton = this.webDriver.FindElement(this.loginButtonSelector);
 
-            var username = WebDriverUtilities.PickUsername();
+            this.WaitUntilLoginFormElementsAreDisplayed(usernameInputField, passwordInputField, loginButton);
 
-            WebDriverUtilities.InteractWithInputElement(this.actions, this.usernameInputField!, username);
-            WebDriverUtilities.InteractWithInputElement(this.actions, this.passwordInputField!, DataConstants.LoginPageConstants.Password);
+            WebDriverUtilities.InteractWithInputElement(this.actions, usernameInputField, username);
+            WebDriverUtilities.InteractWithInputElement(this.actions, passwordInputField, password);
 
-            WebDriverUtilities.ClearOutPasswordField(this.actions, this.passwordInputField!);
+            WebDriverUtilities.ClearOutPasswordField(this.actions, passwordInputField);
 
-            if (this.passwordInputField!.GetAttribute("value") == string.Empty)
+            if (passwordInputField.GetAttribute("value") == string.Empty)
             {
                 Console.WriteLine("Password field value is empty!");
-                WebDriverUtilities.InteractWithSubmitWithButton(this.actions, this.loginButton!);
+                WebDriverUtilities.InteractWithSubmitWithButton(this.actions, loginButton);
             }
 
-            try
-            {
-                this.GetPasswordRequiredErrorMessage();
-                Console.WriteLine("Login failed!");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-                Console.WriteLine("Login succeeded!");
-            }
+            return new LoginPage(this.webDriver);
         }
 
         /// <summary>
-        /// Method responsible for opening a url by utilizing Selenium WebDriver.
+        /// Method which finds the error message element that's displayed upon unsuccessful login.
         /// </summary>
-        /// <returns>The current instance of the class so methods can be chained together.</returns>
-        public LoginPage OpenUrl()
+        /// <returns>The text of the password required error element.</returns>
+        public string GetPasswordRequiredErrorMessage()
         {
-            this.webDriver.Url = DataConstants.WebDriver.Url;
-            return this;
+            return this.wait.Until(driver => this.webDriver.FindElement(this.passwordRequiredErrorMessageSelector)).Text;
         }
 
-        private void GetPasswordRequiredErrorMessage()
+        private void WaitUntilLoginFormElementsAreDisplayed(IWebElement usernameInputField, IWebElement passwordInputField, IWebElement loginButton)
         {
-            this.wait.Until(driver => this.passwordRequiredErrorMessage!.Displayed ? this.passwordRequiredErrorMessage : null);
-        }
-
-        private void WaitUntilElementsAreDisplayed()
-        {
-            this.wait.Until(driver => this.usernameInputField!.Displayed ? this.usernameInputField : null);
-            this.wait.Until(driver => this.passwordInputField!.Displayed ? this.passwordInputField : null);
-            this.wait.Until(driver => this.loginButton!.Displayed ? this.loginButton : null);
+            this.wait.Until(driver => usernameInputField.Displayed ? usernameInputField : null);
+            this.wait.Until(driver => passwordInputField.Displayed ? passwordInputField : null);
+            this.wait.Until(driver => loginButton.Displayed ? loginButton : null);
         }
     }
 }

@@ -4,9 +4,9 @@
 
 namespace SauceDemo.Utilities
 {
+    using System.Diagnostics;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions;
-    using OpenQA.Selenium.Support.UI;
     using SauceDemo.Constants;
 
     /// <summary>
@@ -43,6 +43,10 @@ namespace SauceDemo.Utilities
                 .Perform();
         }
 
+        /// <summary>
+        /// Helper method which picks a random user agent from a pre-defined list to avoid website restrictions if any are present.
+        /// </summary>
+        /// <returns>The user agent as string.</returns>
         public static string RandomizeUserAgent()
         {
             var rand = new Random();
@@ -69,16 +73,35 @@ namespace SauceDemo.Utilities
             return username;
         }
 
+        /// <summary>
+        /// Method responsible for clearing out the password field simulating a user action.
+        /// </summary>
+        /// <param name="actions">The actions object which provides a mechanism to interact with the browser.</param>
+        /// <param name="passwordInputElement">The password input field element where the password text has to be filled in.</param>
         public static void ClearOutPasswordField(Actions actions, IWebElement passwordInputElement)
         {
-            while (passwordInputElement.GetAttribute("value") != string.Empty)
-            {
-                actions
-                    .Click(passwordInputElement)
-                    .KeyDown(Keys.Backspace)
-                    .Perform();
-            }
+            actions
+                .Click(passwordInputElement)
+                .KeyDown(Keys.LeftControl)
+                .KeyDown("a")
+                .KeyUp("a")
+                .KeyUp(Keys.LeftControl)
+                .Pause(TimeSpan.FromMilliseconds(300))
+                .KeyDown(Keys.Delete)
+                .KeyUp(Keys.Delete)
+                .Pause(TimeSpan.FromMilliseconds(300))
+                .Perform();
         }
 
+        /// <summary>
+        /// Method responsible for killing the current webdriver forcefully.
+        /// </summary>
+        public static void Kill()
+        {
+            foreach (var process in Process.GetProcessesByName("geckodriver.exe"))
+            {
+                process.Kill();
+            }
+        }
     }
 }

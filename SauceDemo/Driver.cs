@@ -16,8 +16,6 @@ namespace SauceDemo
     /// </summary>
     public class Driver
     {
-        private static volatile IWebDriver? webDriver;
-
         private Driver()
         {
         }
@@ -29,39 +27,35 @@ namespace SauceDemo
         /// <returns>Returns the current WebDriver instance.</returns>
         public static IWebDriver Initialize(string webDriverName)
         {
-            if (webDriver == null)
-            {
-                if (webDriverName == DataConstants.WebDriver.ChromeDriverBrowserName)
+                return webDriverName switch
                 {
-                    webDriver = new ChromeDriver();
-                }
-                else if (webDriverName == DataConstants.WebDriver.FirefoxDriverBrowserName)
-                {
-                    webDriver = new FirefoxDriver();
-                }
-                else if (webDriverName == DataConstants.WebDriver.SafariDriverBrowserName)
-                {
-                    webDriver = new SafariDriver();
-                }
-                else if (webDriverName == DataConstants.WebDriver.EdgeDriverBrowserName)
-                {
-                    webDriver = new EdgeDriver();
-                }
-            }
-
-            return webDriver!;
+                        DataConstants.WebDriver.ChromeDriverBrowserName => new ChromeDriver(GetChromeOptions()),
+                        DataConstants.WebDriver.FirefoxDriverBrowserName => new FirefoxDriver(GetFirefoxOptions()),
+                        DataConstants.WebDriver.SafariDriverBrowserName => new SafariDriver(),
+                        DataConstants.WebDriver.EdgeDriverBrowserName => new EdgeDriver(GetEdgeOptions()),
+                        _ => throw new ArgumentException($"Unsupported browser: {webDriverName}"),
+                };
         }
 
-        /// <summary>
-        /// Method that is responsible for quitting from and destroying the WebDriver instance.
-        /// </summary>
-        public static void QuitDriver()
+        private static ChromeOptions GetChromeOptions()
         {
-            if (webDriver != null)
-            {
-                webDriver.Quit();
-                webDriver = null;
-            }
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("--headless");
+            return chromeOptions;
+        }
+
+        private static FirefoxOptions GetFirefoxOptions()
+        {
+            var firefoxOptions = new FirefoxOptions();
+            firefoxOptions.AddArgument("--headless");
+            return firefoxOptions;
+        }
+
+        private static EdgeOptions GetEdgeOptions()
+        {
+            var edgeOptions = new EdgeOptions();
+            edgeOptions.AddArgument("--headless");
+            return edgeOptions;
         }
     }
 }

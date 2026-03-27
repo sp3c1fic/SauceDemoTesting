@@ -18,9 +18,22 @@
             public const string UsernameInputFieldCssSelector = "#user-name";
             public const string PasswordInputFieldCssSelector = "#password";
             public const string LoginButtonCssSelector = "#login-button";
-            public const string Password = "secret_sauce";
             public const string PasswordRequiredErrorLoginMessageCssSelector = ".error-message-container > h3:nth-child(1)";
             public static readonly string[] Usernames = { "standard_user", "locked_out_user", "problem_user", "performance_glitch_user", "error_user", "visual_user" };
+        }
+
+        public abstract class MainPageConstants
+        {
+            public const string HeaderContainerCssSelector = "#header_container";
+            public const string PrimaryHeaderContainerCssSelector = ".primary_header";
+            public const string MenuButtonContainerCssSelector = "#menu_button_container";
+            public const string BurgerMenuButtonWrapperCssSelector = ".bm-burger-button";
+            public const string BurgerMenuButtonCssSelector = "#react-burger-menu-btn";
+            public const string MainPageHeadingLable = ".app_logo";
+            public const string ShoppingCartIconCssSelector = ".shopping_cart_link";
+            public const string ProductSortContainerCssSelector = ".product_sort_container";
+            public const string InventoryListContainerCssSelector = ".inventory_list";
+            public const string PageWrapperCssSelector = "#page_wrapper";
         }
     }
 }

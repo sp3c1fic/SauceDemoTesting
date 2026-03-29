@@ -4,8 +4,6 @@
 
 namespace SauceDemoTests
 {
-    using System.Diagnostics;
-    using NUnit.Framework.Diagnostics;
     using OpenQA.Selenium;
     using SauceDemo;
     using SauceDemo.Constants;
@@ -32,11 +30,7 @@ namespace SauceDemoTests
             this.webDriver = Driver.Initialize(this.browser);
             this.webDriver.Navigate().GoToUrl(DataConstants.WebDriver.Url);
             this.loginPage = new LoginPage(this.webDriver);
-
-            if (!Trace.Listeners.OfType<ProgressTraceListener>().Any())
-            {
-                Trace.Listeners.Add(new ProgressTraceListener());
-            }
+            TestContext.Out.WriteLine($"Starting test: {TestContext.CurrentContext.Test.Name}");
         }
 
         /// <summary>
@@ -53,12 +47,12 @@ namespace SauceDemoTests
         {
             var mainPage = this.loginPage.LoginWithPassword(username, password);
             var isAllAdded = mainPage.AddItemsToShoppingCart();
-
-            Assert.That(isAllAdded, Has.Exactly(6).EqualTo(true), "An item failed to be added to the cart.");
+            Assert.That(isAllAdded, Has.Exactly(6).EqualTo(true), "Not all items have been successfully added to the cart.");
+            TestContext.Out.WriteLine($"Adding items to the cart result succeeded: {isAllAdded.All(v => v.Equals(true))}");
         }
 
         /// <summary>
-        /// This test function tests adding products to the shopping cart with intentionally a user which is intentionally broken and assures that the functionality doesn't work right and throws and exception.
+        /// This test function tests adding products to the shopping cart with user which is intentionally broken and assures that the functionality doesn't work right and throws and exception.
         /// </summary>
         /// <param name="username">Login username.</param>
         /// <param name="password">Login password.</param>
@@ -68,6 +62,7 @@ namespace SauceDemoTests
         {
             var mainPage = this.loginPage.LoginWithPassword(username, password);
             Assert.Throws<NoSuchElementException>(() => mainPage.AddItemsToShoppingCart(), "Shopping cart badge couldn't be found.");
+            TestContext.Out.WriteLine($"Adding items as '{username}' should result in a '{typeof(NoSuchElementException)}' since the shopping cart badge cannot be located. ");
         }
 
         /// <summary>
@@ -76,6 +71,7 @@ namespace SauceDemoTests
         [TearDown]
         public void TearDown()
         {
+            TestContext.Out.WriteLine($"Test finished with status: {TestContext.CurrentContext.Result.Outcome}");
             this.webDriver?.Quit();
             this.webDriver?.Dispose();
         }

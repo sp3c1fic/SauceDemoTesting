@@ -18,7 +18,6 @@ namespace SauceDemo.Pages
         private readonly WebDriverWait wait;
         private readonly IWebDriver webDriver;
         private readonly Actions actions;
-
         private readonly By usernameInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.UsernameInputFieldCssSelector);
         private readonly By passwordInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.PasswordInputFieldCssSelector);
         private readonly By loginButtonSelector = By.CssSelector(DataConstants.LoginPageConstants.LoginButtonCssSelector);

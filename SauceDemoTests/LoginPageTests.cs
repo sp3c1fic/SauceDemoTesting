@@ -30,6 +30,7 @@ namespace SauceDemoTests
             this.webDriver = Driver.Initialize(this.browser);
             this.webDriver.Navigate().GoToUrl(DataConstants.WebDriver.Url);
             this.loginPage = new LoginPage(this.webDriver);
+            TestContext.Out.WriteLine($"Starting test: {TestContext.CurrentContext.Test.Name}");
         }
 
         /// <summary>
@@ -45,8 +46,10 @@ namespace SauceDemoTests
         [TestCase("performance_glitch_user", "secret_sauce")]
         public void LoginWithoutPasswordShouldFail(string username, string password)
         {
+            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {this.browser}");
             var loginResult = this.loginPage.LoginWithoutPassword(username, password);
             Assert.That(loginResult.GetPasswordRequiredErrorMessage(), Is.EqualTo("Epic sadface: Password is required"), "Password is required.");
+            TestContext.Out.WriteLine($"Login result: {loginResult.GetPasswordRequiredErrorMessage().Split(": ")[1]}");
         }
 
         /// <summary>
@@ -62,14 +65,24 @@ namespace SauceDemoTests
         [TestCase("performance_glitch_user", "secret_sauce")]
         public void LoginWithCorrectCredentialsShouldSucceed(string username, string password)
         {
+            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {this.browser}");
             var mainPage = this.loginPage.LoginWithPassword(username, password);
 
             Assert.Multiple(() =>
             {
+                TestContext.Out.WriteLine($"Burger menu present: {mainPage.IsBurgerMenuButtonPresent()}");
                 Assert.That(mainPage.IsBurgerMenuButtonPresent(), Is.True, "Burger menu button not found.");
+
+                TestContext.Out.WriteLine($"Heading lable present: {mainPage.IsHeadingLablePresent()}");
                 Assert.That(mainPage.IsHeadingLablePresent(), Is.True, "Heading lable not found.");
+
+                TestContext.Out.WriteLine($"Shopping cart icon present: {mainPage.IsShoppingCartIconPresent()}");
                 Assert.That(mainPage.IsShoppingCartIconPresent(), Is.True, "Shopping cart icon not found.");
+
+                TestContext.Out.WriteLine($"Product sort container present: {mainPage.IsProductSortContainerPresent()}");
                 Assert.That(mainPage.IsProductSortContainerPresent(), Is.True, "Product sort container not found.");
+
+                TestContext.Out.WriteLine($"Inventory list present: {mainPage.IsInventoryListPresent()}");
                 Assert.That(mainPage.IsInventoryListPresent(), Is.True, "Inventory list not found");
             });
         }
@@ -80,6 +93,7 @@ namespace SauceDemoTests
         [TearDown]
         public void TearDown()
         {
+            TestContext.Out.WriteLine($"Test finished with status: {TestContext.CurrentContext.Result.Outcome}");
             this.webDriver?.Quit();
             this.webDriver?.Dispose();
         }

@@ -8,8 +8,8 @@ namespace SauceDemo
     using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium.Edge;
     using OpenQA.Selenium.Firefox;
-    using OpenQA.Selenium.Safari;
     using SauceDemo.Constants;
+    using SauceDemo.Utilities;
 
     /// <summary>
     /// This class is responsible for initializing the Selenium Web Driver making sure to utilize the Singleton Principle approach.
@@ -29,33 +29,44 @@ namespace SauceDemo
         {
                 return webDriverName switch
                 {
-                        DataConstants.WebDriver.ChromeDriverBrowserName => new ChromeDriver(GetChromeOptions()),
-                        DataConstants.WebDriver.FirefoxDriverBrowserName => new FirefoxDriver(GetFirefoxOptions()),
-                        DataConstants.WebDriver.SafariDriverBrowserName => new SafariDriver(),
-                        DataConstants.WebDriver.EdgeDriverBrowserName => new EdgeDriver(GetEdgeOptions()),
+                        DataConstants.WebDriver.ChromeDriverBrowserName => new ChromeDriver(GetDriverOptions<ChromeOptions>()),
+                        DataConstants.WebDriver.FirefoxDriverBrowserName => new FirefoxDriver(GetDriverOptions<FirefoxOptions>()),
+                        DataConstants.WebDriver.EdgeDriverBrowserName => new EdgeDriver(GetDriverOptions<EdgeOptions>()),
                         _ => throw new ArgumentException($"Unsupported browser: {webDriverName}"),
                 };
         }
 
-        private static ChromeOptions GetChromeOptions()
+        private static T GetDriverOptions<T>()
+            where T : DriverOptions, new()
         {
-            var chromeOptions = new ChromeOptions();
-            chromeOptions.AddArguments("--headless");
-            return chromeOptions;
-        }
+            var options = new T();
+            var arguments = new[]
+            {
+                "--headless",
+                $"user-agent={WebDriverUtilities.RandomizeUserAgent()}",
+                "--disable-notifications",
+                "--disable-popup-blocking",
+                "--no-sandbox",
+                "--incognito",
+                "--disable-gpu", // harmless to include alongside headless
+                "--disable-dev-shm-usage", // Good habbit if this runs in CI
+                "--disable-blink-features=AutomationControlled", // Removes the web driver flag
+            };
 
-        private static FirefoxOptions GetFirefoxOptions()
-        {
-            var firefoxOptions = new FirefoxOptions();
-            firefoxOptions.AddArgument("--headless");
-            return firefoxOptions;
-        }
+            switch (options)
+            {
+                case ChromeOptions chrome:
+                    chrome.AddArguments(arguments);
+                    break;
+                case FirefoxOptions firefox:
+                    firefox.AddArguments(arguments);
+                    break;
+                case EdgeOptions edge:
+                    edge.AddArguments(arguments);
+                    break;
+            }
 
-        private static EdgeOptions GetEdgeOptions()
-        {
-            var edgeOptions = new EdgeOptions();
-            edgeOptions.AddArgument("--headless");
-            return edgeOptions;
+            return options;
         }
     }
 }

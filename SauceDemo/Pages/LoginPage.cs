@@ -52,7 +52,7 @@ namespace SauceDemo.Pages
 
             WebDriverUtilities.InteractWithInputElement(this.actions, usernameInputField, username);
             WebDriverUtilities.InteractWithInputElement(this.actions, passwordInputField, password);
-            WebDriverUtilities.InteractWithSubmitWithButton(this.actions, loginButton);
+            WebDriverUtilities.InteractWithButton(this.actions, loginButton);
 
             return new MainPage(this.webDriver);
         }
@@ -79,8 +79,7 @@ namespace SauceDemo.Pages
 
             if (passwordInputField.GetAttribute("value") == string.Empty)
             {
-                Console.WriteLine("Password field value is empty!");
-                WebDriverUtilities.InteractWithSubmitWithButton(this.actions, loginButton);
+                WebDriverUtilities.InteractWithButton(this.actions, loginButton);
             }
 
             return new LoginPage(this.webDriver);

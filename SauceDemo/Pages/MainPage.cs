@@ -4,26 +4,31 @@
 
 namespace SauceDemo.Pages
 {
+    using System.Linq;
     using OpenQA.Selenium;
+    using OpenQA.Selenium.Interactions;
     using OpenQA.Selenium.Support.UI;
     using SauceDemo.Constants;
-    using SauceDemo.Interfaces;
+    using SauceDemo.Utilities;
+    using SeleniumExtras.WaitHelpers;
 
     /// <summary>
     /// The Main Page Class which is responsible for automating the whole process of loggining into an account and encapsulating the logic for that.
     /// </summary>
-    public class MainPage : IPage
+    public class MainPage
     {
         private readonly WebDriverWait wait;
+        private readonly Actions actions;
         private readonly IWebDriver webDriver;
-        private readonly By headerContainerLocator = By.CssSelector(DataConstants.MainPageConstants.HeaderContainerCssSelector);
-        private readonly By primaryHeaderContainerLocator = By.CssSelector(DataConstants.MainPageConstants.PrimaryHeaderContainerCssSelector);
-        private readonly By menuButtonContainer = By.CssSelector(DataConstants.MainPageConstants.MenuButtonContainerCssSelector);
         private readonly By burgerMenuLocator = By.CssSelector(DataConstants.MainPageConstants.BurgerMenuButtonWrapperCssSelector);
-        private readonly By mainPageHeadingLableLocator= By.CssSelector(DataConstants.MainPageConstants.MainPageHeadingLable);
+        private readonly By mainPageHeadingLableLocator = By.CssSelector(DataConstants.MainPageConstants.MainPageHeadingLable);
         private readonly By shoppingCartIconLocator = By.CssSelector(DataConstants.MainPageConstants.ShoppingCartIconCssSelector);
         private readonly By productSortContainerLocator = By.CssSelector(DataConstants.MainPageConstants.ProductSortContainerCssSelector);
         private readonly By inventoryListLocator = By.CssSelector(DataConstants.MainPageConstants.InventoryListContainerCssSelector);
+        private readonly By inventoryItemLocator = By.CssSelector(DataConstants.MainPageConstants.InventoryItemCssSelector);
+        private readonly By backToProductsLinkLocator = By.CssSelector(DataConstants.MainPageConstants.BackToProductsLinkCssSelector);
+        private readonly By addToCartButtonLocator = By.CssSelector(DataConstants.MainPageConstants.AddToCartButtonCssSelector);
+        private readonly By shoppingCartBadgeLocator = By.CssSelector(DataConstants.MainPageConstants.ShoppingCartBadgeCssSelector);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainPage"/> class.
@@ -32,55 +37,88 @@ namespace SauceDemo.Pages
         public MainPage(IWebDriver webDriver)
         {
             this.webDriver = webDriver;
-            this.wait = new WebDriverWait(this.webDriver, TimeSpan.FromSeconds(35));
+            this.wait = new WebDriverWait(this.webDriver, TimeSpan.FromSeconds(35))
+            {
+                PollingInterval = TimeSpan.FromMilliseconds(200),
+            };
+            this.actions = new Actions(this.webDriver);
+        }
+
+        /// <summary>
+        /// Method responsible for testing the add product to shopping cart functionality and its behaviour.
+        /// </summary>
+        /// <returns>A boolean array indicating whether all products were added successfuly.</returns>
+        public bool[] AddItemsToShoppingCart()
+        {
+            if (!this.IsInventoryListPresent())
+            {
+                return Array.Empty<bool>();
+            }
+
+            var allItems = this.webDriver.FindElements(this.inventoryItemLocator); // Locate each item element
+            var itemIds = allItems
+                .Select(item => item.FindElement(By.TagName("a")).GetAttribute("id")) // Get each item element's id.
+                .ToList();
+
+            var isAllAdded = new bool[itemIds.Count];
+
+            for (int i = 0; i < itemIds.Count; i++) // Iterate over the ids
+            {
+                var currentItems = this.webDriver.FindElements(this.inventoryItemLocator); // Relocate the items again to avoid StaleReferenceException
+
+                var targetItem = currentItems
+                                .FirstOrDefault(item =>
+                                    item.FindElement(By.TagName("a")).GetAttribute("id") == itemIds[i]); // Get the target element.
+
+                if (targetItem == null)
+                {
+                    continue;
+                }
+
+                targetItem.FindElement(By.TagName("a")).Click(); // Get the target element's <a> link
+
+                // Rest of the functionality below is responsible for adding each product to the shopping cart. And repeating the process all over again.
+                var addToCartButton = this.webDriver.FindElement(this.addToCartButtonLocator);
+                this.wait.Until(ExpectedConditions.ElementToBeClickable(this.addToCartButtonLocator));
+
+                WebDriverUtilities.InteractWithButton(this.actions, addToCartButton);
+                var shoppingCartBadge = this.webDriver.FindElement(this.shoppingCartBadgeLocator);
+                this.wait.Until(d => shoppingCartBadge.Displayed);
+
+                var backToProductsButton = this.webDriver.FindElement(this.backToProductsLinkLocator);
+                WebDriverUtilities.InteractWithButton(this.actions, backToProductsButton);
+
+                // Wait for the list to be back before the next iteration
+                this.wait.Until(d => this.IsInventoryListPresent());
+                isAllAdded[i] = true;
+            }
+
+            return isAllAdded;
         }
 
         /// <summary>
         /// Method which looks for a burger menu element in order to ensure a successful login.
         /// </summary>
         /// <returns>Boolean indicating whether the burger menu was present on the page.</returns>
-        public bool IsBurgerMenuButtonPresent()
-        {
-            var headerContainer = this.webDriver!.FindElement(this.headerContainerLocator);
-            this.wait.Until(d => headerContainer.Displayed);
-
-            var primaryHeader = headerContainer.FindElement(this.primaryHeaderContainerLocator);
-            var burgerMenuButtonContainer = primaryHeader.FindElement(this.menuButtonContainer);
-            var innerMenuButtonDivContainer = burgerMenuButtonContainer.FindElement(By.CssSelector("div"));
-            var burgerMenu = innerMenuButtonDivContainer.FindElement(this.burgerMenuLocator);
-            return this.wait.Until(d => burgerMenu.Displayed);
-        }
+        public bool IsBurgerMenuButtonPresent() => this.IsElementPresent(this.burgerMenuLocator);
 
         /// <summary>
         /// Method that attempts to find the heading lable element in order to determine whether its present or not indicating if login failed or not.
         /// </summary>
         /// <returns>The application logo element's text indicating that it's present and making it easier for testing.</returns>
-        public string IsHeadingLablePresent()
-        {
-            var appLogo = this.webDriver!.FindElement(this.mainPageHeadingLableLocator);
-            this.wait.Until(d => appLogo.Displayed);
-            return appLogo.Text;
-        }
+        public bool IsHeadingLablePresent() => this.IsElementPresent(this.mainPageHeadingLableLocator);
 
         /// <summary>
         /// Method that attempts to find the shopping cart icon element in order to determine whether its present or not indicating if login failed or not.
         /// </summary>
         /// <returns>Boolean value indicating that the shopping cart icon element is present indicating if a login failed or not making it easier for testing.</returns>
-        public bool IsShoppingCartIconPresent()
-        {
-            var shoppingCartIcon = this.webDriver!.FindElement(this.shoppingCartIconLocator);
-            return this.wait.Until(d => shoppingCartIcon.Displayed);
-        }
+        public bool IsShoppingCartIconPresent() => this.IsElementPresent(this.shoppingCartIconLocator);
 
         /// <summary>
         /// Method that attempts to find the product sort container in order to determine whether its present or not indicating if login failed or not.
         /// </summary>
         /// <returns>Boolean value indicating that the product sort container is and making it easier for testing.</returns>
-        public bool IsProductSortContainerPresent()
-        {
-            var productSortContainer = this.webDriver!.FindElement(this.productSortContainerLocator);
-            return this.wait.Until(d => productSortContainer.Displayed);
-        }
+        public bool IsProductSortContainerPresent() => this.IsElementPresent(this.productSortContainerLocator);
 
         /// <summary>
         /// Method that attempts to find the inventory list element in order to determine whether its present or not indicating if login failed or not.
@@ -90,6 +128,19 @@ namespace SauceDemo.Pages
         {
             var inventoryList = this.webDriver!.FindElement(this.inventoryListLocator);
             return this.wait.Until(driver => inventoryList.Displayed);
+        }
+
+        private bool IsElementPresent(By locator)
+        {
+            try
+            {
+                var element = this.webDriver!.FindElement(locator);
+                return this.wait.Until(d => element.Displayed);
+            }
+            catch (NoSuchElementException)
+            {
+                return false;
+            }
         }
     }
 }

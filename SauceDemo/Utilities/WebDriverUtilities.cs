@@ -4,7 +4,6 @@
 
 namespace SauceDemo.Utilities
 {
-    using System.Diagnostics;
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions;
     using SauceDemo.Constants;
@@ -34,7 +33,7 @@ namespace SauceDemo.Utilities
         /// </summary>
         /// <param name="actions">The Actions class which provides mechanism for advanced interaction with the browser.</param>
         /// <param name="submitButton">The button which will be interacted with.</param>
-        public static void InteractWithSubmitWithButton(Actions actions, IWebElement submitButton)
+        public static void InteractWithButton(Actions actions, IWebElement submitButton)
         {
             actions
                 .Pause(TimeSpan.FromSeconds(3))
@@ -50,13 +49,8 @@ namespace SauceDemo.Utilities
         public static string RandomizeUserAgent()
         {
             var rand = new Random();
-
             var randomIndex = rand.Next(0, DataConstants.WebDriver.UserAgents.Length - 1);
-
-            Console.WriteLine(DataConstants.WebDriver.UserAgents[randomIndex]);
-
             var userAgent = DataConstants.WebDriver.UserAgents[randomIndex];
-
             return userAgent;
         }
 
@@ -67,7 +61,6 @@ namespace SauceDemo.Utilities
         public static string PickUsername()
         {
             var rand = new Random();
-
             var randomIndex = rand.Next(0, DataConstants.LoginPageConstants.Usernames.Length - 1);
             var username = DataConstants.LoginPageConstants.Usernames[randomIndex];
             return username;
@@ -91,17 +84,6 @@ namespace SauceDemo.Utilities
                 .KeyUp(Keys.Delete)
                 .Pause(TimeSpan.FromMilliseconds(300))
                 .Perform();
-        }
-
-        /// <summary>
-        /// Method responsible for killing the current webdriver forcefully.
-        /// </summary>
-        public static void Kill()
-        {
-            foreach (var process in Process.GetProcessesByName("geckodriver.exe"))
-            {
-                process.Kill();
-            }
         }
     }
 }

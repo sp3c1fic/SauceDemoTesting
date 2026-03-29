@@ -30,14 +30,13 @@ Automated end-to-end test suite for the [SauceDemo](https://www.saucedemo.com/) 
 
 ## 🧾 Test Coverage
 
-| Area | Description |
-|---|---|
-| Login | Valid credentials across all user accounts |
-| Login | Attempt without password |
-| Login | Locked out user handling |
-| Inventory | Page element verification post-login |
-| Shopping Cart | Add all items to cart, verify badge count |
-| Defect | `problem_user` broken add-to-cart assertion |
+**Login** — Valid and invalid login attempts across all six user accounts, including attempts without a password.
+
+**Inventory Page** — Post-login verification of key page elements: burger menu, heading label, product sort container, shopping cart icon, and inventory list.
+
+**Shopping Cart** — Add all available items to the cart and verify the badge count updates correctly.
+
+**Defect Coverage** — `problem_user` has intentionally broken add-to-cart functionality. A dedicated test asserts this known defect by expecting a `WebDriverTimeoutException` rather than treating it as a test failure.
 
 ---
 
@@ -45,15 +44,16 @@ Automated end-to-end test suite for the [SauceDemo](https://www.saucedemo.com/) 
 
 ```
 SauceDemo/
-├── Constants/
-│   └── DataConstants.cs        # CSS selectors and test data
-├── Pages/
-│   ├── LoginPage.cs            # Login page object
-│   └── MainPage.cs             # Inventory/main page object
-├── Tests/
-│   └── *.cs                    # NUnit test classes
-└── Utilities/
-    └── WebDriverUtilities.cs   # Driver config and interaction helpers
+├── SauceDemo/
+│   ├── Constants/
+│   │   └── DataConstants.cs        # CSS selectors and test data
+│   ├── Pages/
+│   │   ├── LoginPage.cs            # Login page object
+│   │   └── MainPage.cs             # Inventory/main page object
+│   └── Utilities/
+│       └── WebDriverUtilities.cs   # Driver config and interaction helpers
+└── SauceDemo.Tests/
+    └── *.cs                        # NUnit test classes
 ```
 
 ---
@@ -65,7 +65,6 @@ SauceDemo provides several built-in user accounts, each simulating different app
 | Username | Behavior |
 |---|---|
 | `standard_user` | Normal functionality |
-| `locked_out_user` | Login blocked |
 | `problem_user` | Broken UI interactions (intentional defect) |
 | `performance_glitch_user` | Artificial delays |
 | `error_user` | Specific interactions throw errors |

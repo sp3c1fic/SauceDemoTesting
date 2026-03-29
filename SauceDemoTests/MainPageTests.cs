@@ -69,5 +69,15 @@ namespace SauceDemoTests
             var mainPage = this.loginPage.LoginWithPassword(username, password);
             Assert.Throws<NoSuchElementException>(() => mainPage.AddItemsToShoppingCart(), "Shopping cart badge couldn't be found.");
         }
+
+        /// <summary>
+        /// Tear down method which is responsible for destroying i.e closing and quitting from the current active WebDriver instance.
+        /// </summary>
+        [TearDown]
+        public void TearDown()
+        {
+            this.webDriver?.Quit();
+            this.webDriver?.Dispose();
+        }
     }
 }

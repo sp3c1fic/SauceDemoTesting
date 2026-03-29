@@ -27,7 +27,7 @@ namespace SauceDemo.Pages
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginPage"/> class.
         /// </summary>
-        /// <param name="webDriver">The WebDriver instances passed down to the main page constructor.</param>
+        /// <param name="webDriver">The WebDriver instances passed down to the login page constructor.</param>
         public LoginPage(IWebDriver webDriver)
         {
             this.webDriver = webDriver;
@@ -44,16 +44,10 @@ namespace SauceDemo.Pages
         /// <returns>An element present only on the main page to determine whether a redirect upon successful login was actually achieved.</returns>
         public MainPage LoginWithPassword(string username, string password)
         {
-            var usernameInputField = this.webDriver.FindElement(this.usernameInputFieldSelector);
-            var passwordInputField = this.webDriver.FindElement(this.passwordInputFieldSelector);
-            var loginButton = this.webDriver.FindElement(this.loginButtonSelector);
-
-            this.WaitUntilLoginFormElementsAreDisplayed(usernameInputField, passwordInputField, loginButton);
-
+            var (usernameInputField, passwordInputField, loginButton) = this.GetLoginFormElements();
             WebDriverUtilities.InteractWithInputElement(this.actions, usernameInputField, username);
             WebDriverUtilities.InteractWithInputElement(this.actions, passwordInputField, password);
             WebDriverUtilities.InteractWithButton(this.actions, loginButton);
-
             return new MainPage(this.webDriver);
         }
 
@@ -66,15 +60,9 @@ namespace SauceDemo.Pages
         /// <param name="password">The password necessary for testing the login functuonality.</param>
         public LoginPage LoginWithoutPassword(string username, string password)
         {
-            var usernameInputField = this.webDriver.FindElement(this.usernameInputFieldSelector);
-            var passwordInputField = this.webDriver.FindElement(this.passwordInputFieldSelector);
-            var loginButton = this.webDriver.FindElement(this.loginButtonSelector);
-
-            this.WaitUntilLoginFormElementsAreDisplayed(usernameInputField, passwordInputField, loginButton);
-
+            var (usernameInputField, passwordInputField, loginButton) = this.GetLoginFormElements();
             WebDriverUtilities.InteractWithInputElement(this.actions, usernameInputField, username);
             WebDriverUtilities.InteractWithInputElement(this.actions, passwordInputField, password);
-
             WebDriverUtilities.ClearOutPasswordField(this.actions, passwordInputField);
 
             if (passwordInputField.GetAttribute("value") == string.Empty)
@@ -92,6 +80,15 @@ namespace SauceDemo.Pages
         public string GetPasswordRequiredErrorMessage()
         {
             return this.wait.Until(driver => this.webDriver.FindElement(this.passwordRequiredErrorMessageSelector)).Text;
+        }
+
+        private (IWebElement username, IWebElement password, IWebElement loginButton) GetLoginFormElements()
+        {
+            var usernameInputField = this.webDriver.FindElement(this.usernameInputFieldSelector);
+            var passwordInputField = this.webDriver.FindElement(this.passwordInputFieldSelector);
+            var loginButton = this.webDriver.FindElement(this.loginButtonSelector);
+            this.WaitUntilLoginFormElementsAreDisplayed(usernameInputField, passwordInputField, loginButton);
+            return (usernameInputField, passwordInputField, loginButton);
         }
 
         private void WaitUntilLoginFormElementsAreDisplayed(IWebElement usernameInputField, IWebElement passwordInputField, IWebElement loginButton)

@@ -55,18 +55,6 @@ namespace SauceDemo.Utilities
         }
 
         /// <summary>
-        /// Utility method that picks a random username among the available ones.
-        /// </summary>
-        /// <returns>The chosen random username as string.</returns>
-        public static string PickUsername()
-        {
-            var rand = new Random();
-            var randomIndex = rand.Next(0, DataConstants.LoginPageConstants.Usernames.Length - 1);
-            var username = DataConstants.LoginPageConstants.Usernames[randomIndex];
-            return username;
-        }
-
-        /// <summary>
         /// Method responsible for clearing out the password field simulating a user action.
         /// </summary>
         /// <param name="actions">The actions object which provides a mechanism to interact with the browser.</param>

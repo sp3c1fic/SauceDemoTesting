@@ -46,7 +46,6 @@ namespace SauceDemoTests
         public void LoginWithoutPasswordShouldFail(string username, string password)
         {
             var loginResult = this.loginPage.LoginWithoutPassword(username, password);
-
             Assert.That(loginResult.GetPasswordRequiredErrorMessage(), Is.EqualTo("Epic sadface: Password is required"), "Password is required.");
         }
 

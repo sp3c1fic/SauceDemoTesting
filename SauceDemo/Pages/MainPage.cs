@@ -55,42 +55,12 @@ namespace SauceDemo.Pages
                 return Array.Empty<bool>();
             }
 
-            var allItems = this.webDriver.FindElements(this.inventoryItemLocator); // Locate each item element
-            var itemIds = allItems
-                .Select(item => item.FindElement(By.TagName("a")).GetAttribute("id")) // Get each item element's id.
-                .ToList();
-
+            var itemIds = this.GetInventoryItemsIds();
             var isAllAdded = new bool[itemIds.Count];
 
             for (int i = 0; i < itemIds.Count; i++) // Iterate over the ids
             {
-                var currentItems = this.webDriver.FindElements(this.inventoryItemLocator); // Relocate the items again to avoid StaleReferenceException
-
-                var targetItem = currentItems
-                                .FirstOrDefault(item =>
-                                    item.FindElement(By.TagName("a")).GetAttribute("id") == itemIds[i]); // Get the target element.
-
-                if (targetItem == null)
-                {
-                    continue;
-                }
-
-                targetItem.FindElement(By.TagName("a")).Click(); // Get the target element's <a> link
-
-                // Rest of the functionality below is responsible for adding each product to the shopping cart. And repeating the process all over again.
-                var addToCartButton = this.webDriver.FindElement(this.addToCartButtonLocator);
-                this.wait.Until(ExpectedConditions.ElementToBeClickable(this.addToCartButtonLocator));
-
-                WebDriverUtilities.InteractWithButton(this.actions, addToCartButton);
-                var shoppingCartBadge = this.webDriver.FindElement(this.shoppingCartBadgeLocator);
-                this.wait.Until(d => shoppingCartBadge.Displayed);
-
-                var backToProductsButton = this.webDriver.FindElement(this.backToProductsLinkLocator);
-                WebDriverUtilities.InteractWithButton(this.actions, backToProductsButton);
-
-                // Wait for the list to be back before the next iteration
-                this.wait.Until(d => this.IsInventoryListPresent());
-                isAllAdded[i] = true;
+                isAllAdded[i] = this.AddItemToCart(itemIds[i] !);
             }
 
             return isAllAdded;
@@ -128,6 +98,46 @@ namespace SauceDemo.Pages
         {
             var inventoryList = this.webDriver!.FindElement(this.inventoryListLocator);
             return this.wait.Until(driver => inventoryList.Displayed);
+        }
+
+        private bool AddItemToCart(string targetId)
+        {
+            var currentItems = this.webDriver.FindElements(this.inventoryItemLocator); // Relocate the items again to avoid StaleReferenceException
+
+            var targetItem = currentItems
+                            .FirstOrDefault(item =>
+                                item.FindElement(By.TagName("a")).GetAttribute("id") == targetId); // Get the target element.
+
+            if (targetItem == null)
+            {
+                return false;
+            }
+
+            targetItem.FindElement(By.TagName("a")).Click(); // Get the target element's <a> link
+
+            // Rest of the functionality below is responsible for adding each product to the shopping cart. And repeating the process all over again.
+            var addToCartButton = this.webDriver.FindElement(this.addToCartButtonLocator);
+            this.wait.Until(ExpectedConditions.ElementToBeClickable(this.addToCartButtonLocator));
+
+            WebDriverUtilities.InteractWithButton(this.actions, addToCartButton);
+            var shoppingCartBadge = this.webDriver.FindElement(this.shoppingCartBadgeLocator);
+            this.wait.Until(d => shoppingCartBadge.Displayed);
+
+            var backToProductsButton = this.webDriver.FindElement(this.backToProductsLinkLocator);
+            WebDriverUtilities.InteractWithButton(this.actions, backToProductsButton);
+
+            // Wait for the list to be back before the next iteration
+            this.wait.Until(d => this.IsInventoryListPresent());
+
+            return true;
+        }
+
+        private List<string?> GetInventoryItemsIds()
+        {
+            var allItems = this.webDriver.FindElements(this.inventoryItemLocator); // Locate each item element
+            return allItems
+                .Select(item => item.FindElement(By.TagName("a")).GetAttribute("id")) // Get each item element's id.
+                .ToList();
         }
 
         private bool IsElementPresent(By locator)

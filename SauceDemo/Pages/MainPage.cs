@@ -8,7 +8,6 @@ namespace SauceDemo.Pages
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions;
     using OpenQA.Selenium.Support.UI;
-    using SauceDemo.Constants;
     using SauceDemo.Utilities;
     using SeleniumExtras.WaitHelpers;
 
@@ -20,15 +19,15 @@ namespace SauceDemo.Pages
         private readonly WebDriverWait wait;
         private readonly Actions actions;
         private readonly IWebDriver webDriver;
-        private readonly By burgerMenuLocator = By.CssSelector(DataConstants.MainPageConstants.BurgerMenuButtonWrapperCssSelector);
-        private readonly By mainPageHeadingLableLocator = By.CssSelector(DataConstants.MainPageConstants.MainPageHeadingLable);
-        private readonly By shoppingCartIconLocator = By.CssSelector(DataConstants.MainPageConstants.ShoppingCartIconCssSelector);
-        private readonly By productSortContainerLocator = By.CssSelector(DataConstants.MainPageConstants.ProductSortContainerCssSelector);
-        private readonly By inventoryListLocator = By.CssSelector(DataConstants.MainPageConstants.InventoryListContainerCssSelector);
-        private readonly By inventoryItemLocator = By.CssSelector(DataConstants.MainPageConstants.InventoryItemCssSelector);
-        private readonly By backToProductsLinkLocator = By.CssSelector(DataConstants.MainPageConstants.BackToProductsLinkCssSelector);
-        private readonly By addToCartButtonLocator = By.CssSelector(DataConstants.MainPageConstants.AddToCartButtonCssSelector);
-        private readonly By shoppingCartBadgeLocator = By.CssSelector(DataConstants.MainPageConstants.ShoppingCartBadgeCssSelector);
+        private readonly By burgerMenuLocator = By.CssSelector("#react-burger-menu-btn");
+        private readonly By mainPageHeadingLableLocator = By.CssSelector(".app_logo");
+        private readonly By shoppingCartIconLocator = By.CssSelector(".shopping_cart_link");
+        private readonly By productSortContainerLocator = By.CssSelector(".product_sort_container");
+        private readonly By inventoryListLocator = By.CssSelector(".inventory_list");
+        private readonly By inventoryItemLocator = By.CssSelector("div.inventory_item");
+        private readonly By backToProductsLinkLocator = By.CssSelector("#back-to-products");
+        private readonly By addToCartButtonLocator = By.CssSelector("#add-to-cart");
+        private readonly By shoppingCartBadgeLocator = By.CssSelector(".shopping_cart_badge");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MainPage"/> class.

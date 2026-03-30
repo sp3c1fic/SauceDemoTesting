@@ -8,7 +8,6 @@ namespace SauceDemo
     using OpenQA.Selenium.Chrome;
     using OpenQA.Selenium.Edge;
     using OpenQA.Selenium.Firefox;
-    using SauceDemo.Constants;
     using SauceDemo.Utilities;
 
     /// <summary>
@@ -27,11 +26,11 @@ namespace SauceDemo
         /// <returns>Returns the current WebDriver instance.</returns>
         public static IWebDriver Initialize(string webDriverName)
         {
-                return webDriverName switch
+                return webDriverName.ToLower() switch
                 {
-                        DataConstants.WebDriver.ChromeDriverBrowserName => new ChromeDriver(GetDriverOptions<ChromeOptions>()),
-                        DataConstants.WebDriver.FirefoxDriverBrowserName => new FirefoxDriver(GetDriverOptions<FirefoxOptions>()),
-                        DataConstants.WebDriver.EdgeDriverBrowserName => new EdgeDriver(GetDriverOptions<EdgeOptions>()),
+                        "chrome" => new ChromeDriver(GetDriverOptions<ChromeOptions>()),
+                        "firefox" => new FirefoxDriver(GetDriverOptions<FirefoxOptions>()),
+                        "edge" => new EdgeDriver(GetDriverOptions<EdgeOptions>()),
                         _ => throw new ArgumentException($"Unsupported browser: {webDriverName}"),
                 };
         }

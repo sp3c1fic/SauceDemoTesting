@@ -7,7 +7,6 @@ namespace SauceDemo.Pages
     using OpenQA.Selenium;
     using OpenQA.Selenium.Interactions;
     using OpenQA.Selenium.Support.UI;
-    using SauceDemo.Constants;
     using SauceDemo.Utilities;
 
     /// <summary>
@@ -18,10 +17,10 @@ namespace SauceDemo.Pages
         private readonly WebDriverWait wait;
         private readonly IWebDriver webDriver;
         private readonly Actions actions;
-        private readonly By usernameInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.UsernameInputFieldCssSelector);
-        private readonly By passwordInputFieldSelector = By.CssSelector(DataConstants.LoginPageConstants.PasswordInputFieldCssSelector);
-        private readonly By loginButtonSelector = By.CssSelector(DataConstants.LoginPageConstants.LoginButtonCssSelector);
-        private readonly By passwordRequiredErrorMessageSelector = By.CssSelector(DataConstants.LoginPageConstants.PasswordRequiredErrorLoginMessageCssSelector);
+        private readonly By usernameInputFieldSelector = By.CssSelector("#user-name");
+        private readonly By passwordInputFieldSelector = By.CssSelector("#password");
+        private readonly By loginButtonSelector = By.CssSelector("#login-button");
+        private readonly By passwordRequiredErrorMessageSelector = By.CssSelector(".error-message-container > h3:nth-child(1)");
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LoginPage"/> class.

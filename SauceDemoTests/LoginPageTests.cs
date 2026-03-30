@@ -4,35 +4,14 @@
 
 namespace SauceDemoTests
 {
-    using OpenQA.Selenium;
-    using SauceDemo;
-    using SauceDemo.Constants;
-    using SauceDemo.Pages;
-
     /// <summary>
     /// Test class which holds all the test methods which ensure that the login functionality on the website that's being tested work flawlessly.
     /// </summary>
     [TestFixture]
     [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
     [Parallelizable(ParallelScope.All)]
-    public class LoginPageTests
+    public class LoginPageTests : BaseTest
     {
-        private readonly string browser = "edge";
-        private IWebDriver webDriver;
-        private LoginPage loginPage;
-
-        /// <summary>
-        /// Main SetUp Method which is responsible for initializing all the neccessary objects.
-        /// </summary>
-        [SetUp]
-        public void Setup()
-        {
-            this.webDriver = Driver.Initialize(this.browser);
-            this.webDriver.Navigate().GoToUrl(DataConstants.WebDriver.Url);
-            this.loginPage = new LoginPage(this.webDriver);
-            TestContext.Out.WriteLine($"Starting test: {TestContext.CurrentContext.Test.Name}");
-        }
-
         /// <summary>
         /// Test method which ensures that when login attempt without a password is made, it should fail.
         /// </summary>
@@ -46,8 +25,8 @@ namespace SauceDemoTests
         [TestCase("performance_glitch_user", "secret_sauce")]
         public void LoginWithoutPasswordShouldFail(string username, string password)
         {
-            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {this.browser}");
-            var loginResult = this.loginPage.LoginWithoutPassword(username, password);
+            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {Configuration["WebDriver:Browser"]}");
+            var loginResult = this.LoginPage.LoginWithoutPassword(username, password);
             Assert.That(loginResult.GetPasswordRequiredErrorMessage(), Is.EqualTo("Epic sadface: Password is required"), "Password is required.");
             TestContext.Out.WriteLine($"Login result: {loginResult.GetPasswordRequiredErrorMessage().Split(": ")[1]}");
         }
@@ -65,8 +44,8 @@ namespace SauceDemoTests
         [TestCase("performance_glitch_user", "secret_sauce")]
         public void LoginWithCorrectCredentialsShouldSucceed(string username, string password)
         {
-            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {this.browser}");
-            var mainPage = this.loginPage.LoginWithPassword(username, password);
+            TestContext.Out.WriteLine($"Testing with user: {username} on browser: {Configuration["WebDriver:Browser"]}");
+            var mainPage = this.LoginPage.LoginWithPassword(username, password);
 
             Assert.Multiple(() =>
             {
@@ -85,17 +64,6 @@ namespace SauceDemoTests
                 TestContext.Out.WriteLine($"Inventory list present: {mainPage.IsInventoryListPresent()}");
                 Assert.That(mainPage.IsInventoryListPresent(), Is.True, "Inventory list not found");
             });
-        }
-
-        /// <summary>
-        /// Tear down method which is responsible for destroying i.e closing and quitting from the current active WebDriver instance.
-        /// </summary>
-        [TearDown]
-        public void TearDown()
-        {
-            TestContext.Out.WriteLine($"Test finished with status: {TestContext.CurrentContext.Result.Outcome}");
-            this.webDriver?.Quit();
-            this.webDriver?.Dispose();
         }
     }
 }
